@@ -14,8 +14,6 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://developer.rentshare.com"
   spec.license = "MIT"
 
-  spec.add_dependency("faraday", "~> 0.10")
-
   spec.files = `git ls-files`.split("\n")
   spec.test_files    = `git ls-files -- test/*`.split("\n")
   spec.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
