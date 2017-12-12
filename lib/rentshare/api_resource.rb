@@ -165,7 +165,7 @@ module RentShare
 		end
 
 		def self.create(**values)
-			RentShare::walk_object(@_obj, inverse: true)
+			RentShare::walk_object(values, inverse: true)
 			return self.request('Post', json: values)
 		end
 
