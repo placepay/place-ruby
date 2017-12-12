@@ -18,9 +18,7 @@ module RentShare
 					val = obj[key]
 				end
 			elsif val.is_a?(Hash) and val['object']
-				puts "here"
 				for resource in RentShare::APIResource.descendants
-					puts resource.object_type
 					if val['object'] != resource.object_type
 						next
 					end
@@ -52,7 +50,6 @@ module RentShare
 		def self.new(client: nil, obj: nil)
 			if obj["id"]
 				if @@object_index[obj["id"]]
-					puts "FOUND!"
 					@@object_index[obj["id"]]._set_obj(obj)
 					return @@object_index[obj["id"]]
 				end
@@ -87,9 +84,6 @@ module RentShare
 
 			if id; path = File.join(path, id) end
 			if path[0] == '/'; path = path[1..-1] end
-
-			puts client.api_url
-			puts path
 
 			uri = URI.join(client.api_url, path)
 			if params; uri.query = URI.encode_www_form(params) end
