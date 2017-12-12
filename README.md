@@ -1,4 +1,4 @@
-# RentShare Ruby Gem
+# RentShare RubyGem
 
 A RubyGem for interfacing with the RentShare API
 
