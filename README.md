@@ -13,6 +13,7 @@ gem 'rentshare', :git => 'git://github.com/rentshare/rentshare-ruby.git'
 To manually install `rentshare-ruby` simply gem install:
 
 ```bash
+gem install specific_install
 gem specific_install https://github.com/rentshare/rentshare-ruby.git
 ```
 
