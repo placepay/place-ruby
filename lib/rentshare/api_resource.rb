@@ -51,10 +51,10 @@ module RentShare
 
 		def self.new(client: nil, obj: nil)
 			if obj["id"]
-				key = '#{self.object_type}_#{obj["id"]}'
-				if @@object_index[key]
-					@@object_index[key]._set_obj(obj)
-					return @@object_index[key]
+				if @@object_index[obj["id"]]
+					puts "FOUND!"
+					@@object_index[obj["id"]]._set_obj(obj)
+					return @@object_index[obj["id"]]
 				end
 			end
 			super
@@ -69,8 +69,7 @@ module RentShare
 			@_obj = obj
 			RentShare::walk_object(@_obj, client: @_client)
 			if obj["id"]
-				key = '#{obj["object"]}_#{obj["id"]}'
-				@@object_index[key] = self
+				@@object_index[obj["id"]] = self
 			end
 		end
 
@@ -82,22 +81,27 @@ module RentShare
 			super
 		end
 
-		def self.request(method, path=nil, id: nil, client: nil, **kwargs)
-			puts @resource
+		def self.request(method, path=nil, id: nil, client: nil, json: nil, params: nil)
 			path   = path || @resource
 			client = client || RentShare.default_client
 
-			if id
-				path = File.join(path, id)
-			end
-			if path[0] == '/'
-				path = path[1..-1]
-			end
-			uri = URI.join(client.api_url, path)
-			http = Net::HTTP.new(uri.host, uri.port)
+			if id; path = File.join(path, id) end
+			if path[0] == '/'; path = path[1..-1] end
 
+			puts client.api_url
+			puts path
+
+			uri = URI.join(client.api_url, path)
+			if params; uri.query = URI.encode_www_form(params) end
+
+			http = Net::HTTP.new(uri.host, uri.port)
 			request = Net::HTTP.const_get(method).new(uri.request_uri)
 			request.basic_auth(client.api_key, "")
+
+			if json
+				request.body = json.to_json
+				request.add_field("Content-Type", "application/json")
+			end
 
 			response = http.request(request)
 			status_code = response.code
@@ -127,13 +131,9 @@ module RentShare
 				end
 
 				for exc in RentShare::APIException.descendants
-					if exc.status_code != status_code
-						next
-					end
+					if exc.status_code != status_code; next end
 
-					if exc.error_type && exc.error_type != obj["error_type"]
-						next
-					end
+					if exc.error_type && exc.error_type != obj["error_type"]; next end
 
 					raise exc.new(obj["error_description"])
 				end
@@ -149,7 +149,7 @@ module RentShare
 		end
 
 		def update(**updates)
-			self.request('Put', id: self.id, json: updates)
+			self.class.request('Put', id: self.id, json: updates)
 		end
 
 		def delete(**updates)
@@ -166,23 +166,23 @@ module RentShare
 
 		def self.create(**values)
 			RentShare::walk_object(@_obj, inverse: true)
-			return self.request('Post', json=values)
+			return self.request('Post', json: values)
 		end
 
-	#	def self.create_all(objects)
-	#		return self.request('post',
-	#							json={"object": "list", "values": objects})
-	#	end
-	#
-	#	def self.update_all(objects, **updates)
-	#		updates = [dict(id=o.id, **updates) for o in objects]
-	#		return self.request('put',
-	#							json={"object": "list", "values": updates})
-	#	end
-	#
-	#	def self.delete_all(objects)
-	#		deletes = '|'.join(map(str, [o.id for o in objects]))
-	#		return cls._request('delete', params={'id': deletes})
-	#	end
+		def self.create_all(objects)
+			return self.request('Post',
+								json: {"object"=>"list", "values"=>objects})
+		end
+
+		def self.update_all(objects, **updates)
+			updates = objects.map {|o| Hash(id: o.id, **updates) }
+			return self.request('Put',
+								json: {"object"=>"list", "values"=>updates})
+		end
+
+		def self.delete_all(objects)
+			deletes = objects.map {|o| o.id }.join('|')
+			return self.request('Delete', params: {'id'=>deletes})
+		end
 	end
 end
