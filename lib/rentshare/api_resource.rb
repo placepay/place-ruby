@@ -1,30 +1,98 @@
 require "net/http"
 require "uri"
-require 'json'
+require "json"
 
 module RentShare
+
+	def self.walk_object(obj, client: nil, inverse: false)
+		if obj.class == Array
+			iter = obj.map.with_index{|a,i| [i,a] }
+		else
+			iter = obj
+		end
+
+		iter.each do |key, val|
+			if inverse
+				if val.is_a?(RentShare::APIResource)
+					obj[key] = val._obj
+					val = obj[key]
+				end
+			elsif val.is_a?(Hash) and val['object']
+				puts "here"
+				for resource in RentShare::APIResource.descendants
+					puts resource.object_type
+					if val['object'] != resource.object_type
+						next
+					end
+
+					obj[key] = resource(client=client, **val)
+					val = obj[key]
+					break
+				end
+			end
+			if [Hash, Array].member? val.class
+				_walk_object(val, clien:client)
+			end
+		end
+	end
+
 	class APIResource
-		@@resource = nil
-		@@object_type = nil
+		def self.descendants
+			ObjectSpace.each_object(Class).select { |klass| klass < self }
+		end
+
+		@resource = nil
+		@object_type = nil
 		@@object_index = {}
 
-		def initialize(client: nil, obj: obj)
+		class << self
+			attr_reader :resource, :object_type
+		end
+
+		def self.new(client: nil, obj: nil)
+			if obj["id"]
+				key = '#{self.object_type}_#{obj["id"]}'
+				if @@object_index[key]
+					@@object_index[key]._set_obj(obj)
+					return @@object_index[key]
+				end
+			end
+			super
+		end
+
+		def initialize(client: nil, obj: nil)
 			@client = client || RentShare.default_client
 			self._set_obj(obj)
 		end
 
 		def _set_obj(obj)
 			@_obj = obj
+			RentShare::walk_object(@_obj, client: @_client)
+			if obj["id"]
+				key = '#{obj["object"]}_#{obj["id"]}'
+				@@object_index[key] = self
+			end
+		end
+
+		def method_missing(name, *args)
+			attr = name.to_s
+			if @_obj.key?(attr)
+				return @_obj[attr]
+			end
+			super
 		end
 
 		def self.request(method, path=nil, id: nil, client: nil, **kwargs)
-			path   = path || @@resource
+			puts @resource
+			path   = path || @resource
 			client = client || RentShare.default_client
 
 			if id
 				path = File.join(path, id)
 			end
-
+			if path[0] == '/'
+				path = path[1..-1]
+			end
 			uri = URI.join(client.api_url, path)
 			http = Net::HTTP.new(uri.host, uri.port)
 
@@ -79,5 +147,42 @@ module RentShare
 
 			return self.new(:client=>client, :obj=>obj)
 		end
+
+		def update(**updates)
+			self.request('Put', id: self.id, json: updates)
+		end
+
+		def delete(**updates)
+			self.request('Delete', id: self.id)
+		end
+
+		def self.get(id)
+			return self.request('Get', id: id)
+		end
+
+		def self.select(**filter_by)
+			return self.request('Get', params: filter_by)
+		end
+
+		def self.create(**values)
+			RentShare::walk_object(@_obj, inverse: true)
+			return self.request('Post', json=values)
+		end
+
+	#	def self.create_all(objects)
+	#		return self.request('post',
+	#							json={"object": "list", "values": objects})
+	#	end
+	#
+	#	def self.update_all(objects, **updates)
+	#		updates = [dict(id=o.id, **updates) for o in objects]
+	#		return self.request('put',
+	#							json={"object": "list", "values": updates})
+	#	end
+	#
+	#	def self.delete_all(objects)
+	#		deletes = '|'.join(map(str, [o.id for o in objects]))
+	#		return cls._request('delete', params={'id': deletes})
+	#	end
 	end
 end

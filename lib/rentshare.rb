@@ -1,7 +1,8 @@
 require "rentshare/version"
-require "rentshare/api_resource"
 require "rentshare/client"
 require "rentshare/exceptions"
+require "rentshare/api_resource"
+require "rentshare/resources"
 
 module RentShare
 
