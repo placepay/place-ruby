@@ -4,6 +4,16 @@ require "json"
 
 module RentShare
 
+	def self.merge_obj( obj: nil, **params )
+		params = params.collect{|k,v| [k.to_s, v]}.to_h
+		if obj
+			obj = obj.merge(params)
+		else
+			obj = params
+		end
+		return obj
+	end
+
 	def self.walk_object(obj, client: nil, inverse: false)
 		if obj.class == Array
 			iter = obj.map.with_index{|a,i| [i,a] }
@@ -23,18 +33,20 @@ module RentShare
 						next
 					end
 
-					obj[key] = resource(client=client, **val)
+					obj[key] = resource.new(client: client, obj: val)
 					val = obj[key]
 					break
 				end
 			end
 			if [Hash, Array].member? val.class
-				_walk_object(val, clien:client)
+				RentShare::walk_object(val, client:client, inverse: inverse)
 			end
 		end
 	end
 
 	class APIResource
+		attr_accessor :_obj
+
 		def self.descendants
 			ObjectSpace.each_object(Class).select { |klass| klass < self }
 		end
@@ -47,7 +59,9 @@ module RentShare
 			attr_reader :resource, :object_type
 		end
 
-		def self.new(client: nil, obj: nil)
+		def self.new(client: nil, obj: nil, **params)
+			obj = RentShare::merge_obj( obj: obj, **params )
+
 			if obj["id"]
 				if @@object_index[obj["id"]]
 					@@object_index[obj["id"]]._set_obj(obj)
@@ -57,7 +71,8 @@ module RentShare
 			super
 		end
 
-		def initialize(client: nil, obj: nil)
+		def initialize(client: nil, obj: nil, **params)
+			obj = RentShare::merge_obj( obj: obj, **params )
 			@client = client || RentShare.default_client
 			self._set_obj(obj)
 		end
@@ -76,6 +91,10 @@ module RentShare
 				return @_obj[attr]
 			end
 			super
+		end
+
+		def json()
+			return JSON.pretty_generate(RentShare::walk_object(@_obj, inverse: true))
 		end
 
 		def self.request(method, path=nil, id: nil, client: nil, json: nil, params: nil)
@@ -154,22 +173,26 @@ module RentShare
 			return self.request('Get', id: id)
 		end
 
-		def self.select(**filter_by)
-			return self.request('Get', params: filter_by)
+		def self.select( update: nil, **filter_by)
+			if update
+				return self.request('Put', params: filter_by, json: update )
+			else
+				return self.request('Get', params: filter_by)
+			end
 		end
 
-		def self.create(**values)
-			RentShare::walk_object(values, inverse: true)
-			return self.request('Post', json: values)
+		def self.create( obj, **params)
+			if obj.class == Array
+				obj = {"object"=>"list", "values"=>obj}
+			else
+				obj = RentShare::merge_obj( obj: obj, **params )
+			end
+			RentShare::walk_object(obj, inverse: true)
+			return self.request('Post', json: obj)
 		end
 
-		def self.create_all(objects)
-			return self.request('Post',
-								json: {"object"=>"list", "values"=>objects})
-		end
-
-		def self.update_all(objects, **updates)
-			updates = objects.map {|o| Hash(id: o.id, **updates) }
+		def self.update_all(updates)
+			updates = updates.map {|o, upd| Hash(id: o.id, **upd) }
 			return self.request('Put',
 								json: {"object"=>"list", "values"=>updates})
 		end

@@ -39,4 +39,34 @@ module RentShare
 		@resource    = '/addresses'
 		@object_type = 'address'
 	end
+
+
+	class RecurringInvoice < APIResource
+		@resource    = '/recurring_invoices'
+		@object_type = 'recurring_invoice'
+	end
+
+
+	class Invoice < APIResource
+		@resource    = '/invoices'
+		@object_type = 'invoice'
+	end
+
+
+	class InvoiceItem < APIResource
+		@resource    = '/invoice_items'
+		@object_type = 'invoice_item'
+	end
+
+
+	class InvoicePayer < APIResource
+		@resource    = '/invoice_payers'
+		@object_type = 'invoice_payer'
+	end
+
+
+	class InvoiceItemAllocation < APIResource
+		@resource    = '/invoice_item_allocations'
+		@object_type = 'invoice_item_allocation'
+	end
 end
