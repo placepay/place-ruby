@@ -14,7 +14,8 @@ module RentShare
 		return obj
 	end
 
-	def self.walk_object(obj, client: nil, inverse: false)
+	def self.conv_object(obj, client: nil, inverse: false)
+		obj = obj.clone
 		if obj.class == Array
 			iter = obj.map.with_index{|a,i| [i,a] }
 		else
@@ -39,9 +40,11 @@ module RentShare
 				end
 			end
 			if [Hash, Array].member? val.class
-				RentShare::walk_object(val, client:client, inverse: inverse)
+				obj[key] = RentShare::conv_object(val, client:client, inverse: inverse)
 			end
 		end
+
+		return obj
 	end
 
 	class APIResource
@@ -79,7 +82,7 @@ module RentShare
 
 		def _set_obj(obj)
 			@_obj = obj
-			RentShare::walk_object(@_obj, client: @_client)
+			@_obj = RentShare::conv_object(@_obj, client: @_client)
 			if obj["id"]
 				@@object_index[obj["id"]] = self
 			end
@@ -94,7 +97,7 @@ module RentShare
 		end
 
 		def json()
-			return JSON.pretty_generate(RentShare::walk_object(@_obj, inverse: true))
+			return JSON.pretty_generate(RentShare::conv_object(@_obj, inverse: true))
 		end
 
 		def self.request(method, path=nil, id: nil, client: nil, json: nil, params: nil)
@@ -187,7 +190,7 @@ module RentShare
 			else
 				obj = RentShare::merge_obj( obj: obj, **params )
 			end
-			RentShare::walk_object(obj, inverse: true)
+			obj = RentShare::conv_object(obj, inverse: true)
 			return self.request('Post', json: obj)
 		end
 
