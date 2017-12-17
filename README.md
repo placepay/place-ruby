@@ -10,7 +10,7 @@ To install using [Bundler](https://bundler.io):
 gem 'rentshare', :git => 'git://github.com/rentshare/rentshare-ruby.git'
 ```
 
-To manually install `rentshare-ruby` simply gem install:
+To manually install `rentshare-ruby` from github use gem specific_install:
 
 ```bash
 gem install specific_install

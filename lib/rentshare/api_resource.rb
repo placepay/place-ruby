@@ -172,13 +172,18 @@ module RentShare
 			self.request('Delete', id: self.id)
 		end
 
-		def self.get(id)
+		def self.get(id,update:nil)
+			if update
+				return self.request('Put', id: id, json: update )
+			end
 			return self.request('Get', id: id)
 		end
 
-		def self.select( update: nil, **filter_by)
-			if update
-				return self.request('Put', params: filter_by, json: update )
+		def self.select( update_all: nil, delete_all: false, **filter_by)
+			if update_all
+				return self.request('Put', params: filter_by, json: update_all)
+			elsif delete_all
+				return self.request('Delete', params: filter_by)
 			else
 				return self.request('Get', params: filter_by)
 			end
