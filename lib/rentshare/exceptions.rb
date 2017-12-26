@@ -36,7 +36,7 @@ module RentShare
 
 
 	class NotFound < APIException
-		@status_code = '403'
+		@status_code = '404'
 	end
 
 

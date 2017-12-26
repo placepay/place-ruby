@@ -168,7 +168,7 @@ module RentShare
 			self.class.request('Put', id: self.id, json: updates)
 		end
 
-		def delete(**updates)
+		def delete()
 			self.request('Delete', id: self.id)
 		end
 
