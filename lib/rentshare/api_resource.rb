@@ -111,6 +111,7 @@ module RentShare
 			if params; uri.query = URI.encode_www_form(params) end
 
 			http = Net::HTTP.new(uri.host, uri.port)
+			if uri.port == 443; http.use_ssl = true end
 			request = Net::HTTP.const_get(method).new(uri.request_uri)
 			request.basic_auth(client.api_key, "")
 
