@@ -170,7 +170,7 @@ module RentShare
 		end
 
 		def delete()
-			self.request('Delete', id: self.id)
+			self.class.request('Delete', id: self.id)
 		end
 
 		def self.get(id,update:nil)
