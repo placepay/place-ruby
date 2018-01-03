@@ -173,11 +173,11 @@ module RentShare
 			self.class.request('Delete', id: self.id)
 		end
 
-		def self.get(id,update:nil)
+		def self.get(id,update:nil, **params)
 			if update
-				return self.request('Put', id: id, json: update )
+				return self.request('Put', id: id, json: update, params: params )
 			end
-			return self.request('Get', id: id)
+			return self.request('Get', id: id, params: params)
 		end
 
 		def self.select( update_all: nil, delete_all: false, **filter_by)
@@ -200,10 +200,10 @@ module RentShare
 			return self.request('Post', json: obj)
 		end
 
-		def self.update_all(updates)
+		def self.update_all(updates, **params)
 			updates = updates.map {|o, upd| Hash(id: o.id, **upd) }
 			return self.request('Put',
-								json: {"object"=>"list", "values"=>updates})
+								json: {"object"=>"list", "values"=>updates}, params: params)
 		end
 
 		def self.delete_all(objects)
