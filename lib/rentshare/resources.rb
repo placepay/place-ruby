@@ -35,6 +35,12 @@ module RentShare
 	end
 
 
+	class PaymentMethod < APIResource
+		@resource    = '/payment_methods'
+		@object_type = 'payment_method'
+	end
+
+
 	class Address < APIResource
 		@resource    = '/addresses'
 		@object_type = 'address'
