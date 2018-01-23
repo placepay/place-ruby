@@ -35,6 +35,12 @@ module RentShare
 	end
 
 
+	class TransactionAllocation < APIResource
+		@resource    = '/transaction_allocations'
+		@object_type = 'transaction_allocation'
+	end
+
+
 	class PaymentMethod < APIResource
 		@resource    = '/payment_methods'
 		@object_type = 'payment_method'
