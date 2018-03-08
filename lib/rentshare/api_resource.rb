@@ -100,7 +100,7 @@ module RentShare
 			return JSON.pretty_generate(RentShare::conv_object(@_obj, inverse: true))
 		end
 
-		def self.request(method, path=nil, id: nil, client: nil, json: nil, params: nil)
+		def self.request(method, path: nil, id: nil, client: nil, json: nil, params: nil)
 			path   = path || @resource
 			client = client || RentShare.default_client
 
@@ -174,6 +174,9 @@ module RentShare
 		end
 
 		def self.get(id,update:nil, **params)
+			if id.empty? || id.nil?
+				raise RentShare::APIException.new('id cannot be blank')
+			end
 			if update
 				return self.request('Put', id: id, json: update, params: params )
 			end
