@@ -152,7 +152,7 @@ module RentShare
 
 					if exc.error_type && exc.error_type != obj["error_type"]; next end
 
-					raise exc.new(obj["error_description"])
+					raise exc.new(obj["error_description"],obj)
 				end
 
 				raise RentShare::APIException.new(obj["error_description"])

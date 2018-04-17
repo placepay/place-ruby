@@ -1,7 +1,13 @@
 module RentShare
 	class APIException < StandardError
+		attr_accessor :error_details
 		@error_type  = nil
 		@status_code = nil
+
+		def initialize( msg = nil, error_details = nil )
+			super(msg)
+			@error_details = error_details
+		end
 
 		def self.descendants
 			ObjectSpace.each_object(Class).select { |klass| klass < self }
