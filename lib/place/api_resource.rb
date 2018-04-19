@@ -114,6 +114,7 @@ module Place
 			if uri.port == 443; http.use_ssl = true end
 			request = Net::HTTP.const_get(method).new(uri.request_uri)
 			request.basic_auth(client.api_key, "")
+			request.add_field("X-API-Version", "v2.5")
 
 			if json
 				request.body = json.to_json
