@@ -1,5 +1,5 @@
 
-module RentShare
+module Place
 	class Client
 		attr_accessor :api_key, :api_url
 
@@ -9,11 +9,11 @@ module RentShare
 		end
 
 		def api_key()
-			@api_key || RentShare.api_key
+			@api_key || Place.api_key
 		end
 
 		def api_url()
-			@api_url || RentShare.api_url
+			@api_url || Place.api_url
 		end
 	end
 end

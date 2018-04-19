@@ -1,4 +1,4 @@
-module RentShare
+module Place
 	class AccessToken < APIResource
 		@resource    = '/access_tokens'
 		@object_type = 'access_token'

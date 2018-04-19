@@ -1,4 +1,4 @@
-module RentShare
+module Place
 	class APIException < StandardError
 		attr_accessor :error_details
 		@error_type  = nil

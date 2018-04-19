@@ -1,17 +1,17 @@
 lib = File.join(File.dirname(__FILE__), "lib")
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'rentshare/version'
+require 'place/version'
 
 Gem::Specification.new do |spec|
-  spec.name = "rentshare"
-  spec.version = RentShare::VERSION
+  spec.name = "place"
+  spec.version = Place::VERSION
   spec.required_ruby_version = ">= 2.0.0"
-  spec.summary = "RentShare ruby library"
-  spec.description = "A simple library to interface with the RentShare REST API. See https://developer.rentshare.com for details."
-  spec.author = "RentShare"
-  spec.email = "help@rentshare.com"
-  spec.homepage = "https://developer.rentshare.com"
+  spec.summary = "Place ruby library"
+  spec.description = "A simple library to interface with the Place REST API. See https://developer.placepay.com for details."
+  spec.author = "Place"
+  spec.email = "help@placepay.com"
+  spec.homepage = "https://developer.placepay.com"
   spec.license = "MIT"
 
   spec.files = `git ls-files`.split("\n")

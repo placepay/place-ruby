@@ -2,7 +2,7 @@ require "net/http"
 require "uri"
 require "json"
 
-module RentShare
+module Place
 
 	def self.merge_obj( obj: nil, **params )
 		params = params.collect{|k,v| [k.to_s, v]}.to_h
@@ -24,12 +24,12 @@ module RentShare
 
 		iter.each do |key, val|
 			if inverse
-				if val.is_a?(RentShare::APIResource)
+				if val.is_a?(Place::APIResource)
 					obj[key] = val._obj
 					val = obj[key]
 				end
 			elsif val.is_a?(Hash) and val['object']
-				for resource in RentShare::APIResource.descendants
+				for resource in Place::APIResource.descendants
 					if val['object'] != resource.object_type
 						next
 					end
@@ -40,7 +40,7 @@ module RentShare
 				end
 			end
 			if [Hash, Array].member? val.class
-				obj[key] = RentShare::conv_object(val, client:client, inverse: inverse)
+				obj[key] = Place::conv_object(val, client:client, inverse: inverse)
 			end
 		end
 
@@ -63,7 +63,7 @@ module RentShare
 		end
 
 		def self.new(client: nil, obj: nil, **params)
-			obj = RentShare::merge_obj( obj: obj, **params )
+			obj = Place::merge_obj( obj: obj, **params )
 
 			if obj["id"]
 				if @@object_index[obj["id"]]
@@ -75,14 +75,14 @@ module RentShare
 		end
 
 		def initialize(client: nil, obj: nil, **params)
-			obj = RentShare::merge_obj( obj: obj, **params )
-			@client = client || RentShare.default_client
+			obj = Place::merge_obj( obj: obj, **params )
+			@client = client || Place.default_client
 			self._set_obj(obj)
 		end
 
 		def _set_obj(obj)
 			@_obj = obj
-			@_obj = RentShare::conv_object(@_obj, client: @_client)
+			@_obj = Place::conv_object(@_obj, client: @_client)
 			if obj["id"]
 				@@object_index[obj["id"]] = self
 			end
@@ -97,12 +97,12 @@ module RentShare
 		end
 
 		def json()
-			return JSON.pretty_generate(RentShare::conv_object(@_obj, inverse: true))
+			return JSON.pretty_generate(Place::conv_object(@_obj, inverse: true))
 		end
 
 		def self.request(method, path: nil, id: nil, client: nil, json: nil, params: nil)
 			path   = path || @resource
-			client = client || RentShare.default_client
+			client = client || Place.default_client
 
 			if id; path = File.join(path, id) end
 			if path[0] == '/'; path = path[1..-1] end
@@ -127,27 +127,27 @@ module RentShare
 				obj = JSON.parse(response.body)
 			rescue JSON::ParserError
 				if status_code == '500'
-					raise RentShare::InternalError.new
+					raise Place::InternalError.new
 				end
 
-				raise RentShare::InvalidResponse.new
+				raise Place::InvalidResponse.new
 			end
 
 			if obj.class != Hash
-				raise RentShare::InvalidResponse.new
+				raise Place::InvalidResponse.new
 			end
 
 			object_type = obj["object"]
 			if !object_type
-				raise RentShare::InvalidResponse.new('Response missing "object" attribute')
+				raise Place::InvalidResponse.new('Response missing "object" attribute')
 			end
 
 			if status_code != '200'
 				if object_type != 'error'
-					raise RentShare::InvalidResponse.new('Expected error object')
+					raise Place::InvalidResponse.new('Expected error object')
 				end
 
-				for exc in RentShare::APIException.descendants
+				for exc in Place::APIException.descendants
 					if exc.status_code != status_code; next end
 
 					if exc.error_type && exc.error_type != obj["error_type"]; next end
@@ -155,7 +155,7 @@ module RentShare
 					raise exc.new(obj["error_description"],obj)
 				end
 
-				raise RentShare::APIException.new(obj["error_description"])
+				raise Place::APIException.new(obj["error_description"])
 			end
 
 			if object_type == 'list'
@@ -175,7 +175,7 @@ module RentShare
 
 		def self.get(id,update:nil, **params)
 			if id.empty? || id.nil?
-				raise RentShare::APIException.new('id cannot be blank')
+				raise Place::APIException.new('id cannot be blank')
 			end
 			if update
 				return self.request('Put', id: id, json: update, params: params )
@@ -197,9 +197,9 @@ module RentShare
 			if obj.class == Array
 				obj = {"object"=>"list", "values"=>obj}
 			else
-				obj = RentShare::merge_obj( obj: obj, **params )
+				obj = Place::merge_obj( obj: obj, **params )
 			end
-			obj = RentShare::conv_object(obj, inverse: true)
+			obj = Place::conv_object(obj, inverse: true)
 			return self.request('Post', json: obj)
 		end
 
