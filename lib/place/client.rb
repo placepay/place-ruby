@@ -13,7 +13,13 @@ module Place
 		end
 
 		def api_url()
-			@api_url || Place.api_url
+			if @api_key
+				return @api_key
+			end
+			if self.api_key && self.api_key.start_with?('test_') and Place.api_url == Place.PROD_URL
+				return Place.TEST_URL
+			end
+			return Place.api_url
 		end
 	end
 end

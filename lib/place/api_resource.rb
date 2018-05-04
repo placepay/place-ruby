@@ -156,7 +156,7 @@ module Place
 					raise exc.new(obj["error_description"],obj)
 				end
 
-				raise Place::APIException.new(obj["error_description"])
+				raise Place::APIException.new(obj["error_description"],obj)
 			end
 
 			if object_type == 'list'
