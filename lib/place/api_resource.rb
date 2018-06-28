@@ -58,8 +58,11 @@ module Place
 		@object_type = nil
 		@@object_index = {}
 
+		@default_params = nil
+
 		class << self
 			attr_reader :resource, :object_type
+			attr_accessor :default_params
 		end
 
 		def self.new(client: nil, obj: nil, **params)
@@ -108,6 +111,12 @@ module Place
 			if path[0] == '/'; path = path[1..-1] end
 
 			uri = URI.join(client.api_url, path)
+			if @default_params
+				if !params; params = {} end
+				@default_params.each do |key, param|
+					if !params.key?(key.to_sym); params[key.to_sym] = param end
+				end
+			end
 			if params; uri.query = URI.encode_www_form(params) end
 
 			http = Net::HTTP.new(uri.host, uri.port)
