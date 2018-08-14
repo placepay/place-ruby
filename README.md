@@ -7,14 +7,13 @@ A RubyGem for interfacing with the Place API
 To install using [Bundler](https://bundler.io):
 
 ```ruby
-gem 'place', :git => 'git://github.com/placepay/place-ruby.git'
+gem 'place-ruby', '~> 0.5.5'
 ```
 
-To manually install `place-ruby` from github use gem specific_install:
+To install `place-ruby` from github use gem:
 
 ```bash
-gem install specific_install
-gem specific_install https://github.com/placepay/place-ruby.git
+gem install place-ruby
 ```
 
 

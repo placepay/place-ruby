@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'place/version'
 
 Gem::Specification.new do |spec|
-  spec.name = "place"
+  spec.name = "place-ruby"
   spec.version = Place::VERSION
   spec.required_ruby_version = ">= 2.0.0"
   spec.summary = "Place ruby library"
