@@ -10,7 +10,7 @@ To install using [Bundler](https://bundler.io):
 gem 'place-ruby', '~> 0.5.5'
 ```
 
-To install `place-ruby` from github use gem:
+To install using gem:
 
 ```bash
 gem install place-ruby
