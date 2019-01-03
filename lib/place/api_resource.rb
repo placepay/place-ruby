@@ -176,6 +176,7 @@ module Place
 		end
 
 		def update(**updates)
+			updates = Place::conv_object(updates, inverse: true)
 			self.class.request('Put', id: self.id, json: updates)
 		end
 
